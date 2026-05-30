@@ -53,6 +53,7 @@ func main() {
 	rh := &handler.ReportHandler{DB: db}
 
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(handler.AuthMiddleware)
 		r.Route("/accounts", func(r chi.Router) {
 			r.Get("/", ah.List)
 			r.Post("/", ah.Create)

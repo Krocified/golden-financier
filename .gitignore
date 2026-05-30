@@ -2,6 +2,10 @@
 backend/server
 backend/golden-financier
 
+# Embedded frontend dist (keep placeholder)
+backend/dist/*
+!backend/dist/dist.placeholder
+
 # SQLite databases
 *.db
 *.db-shm

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -54,6 +56,7 @@ func main() {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(handler.AuthMiddleware)
+
 		r.Route("/accounts", func(r chi.Router) {
 			r.Get("/", ah.List)
 			r.Post("/", ah.Create)
@@ -84,6 +87,9 @@ func main() {
 		})
 	})
 
+	// Serve embedded frontend
+	serveFrontend(r)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -91,4 +97,38 @@ func main() {
 
 	log.Printf("listening on :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
+}
+
+func serveFrontend(r chi.Router) {
+	sub, err := fs.Sub(dist, "dist")
+	if err != nil {
+		log.Printf("no embedded frontend dist found, skipping: %v", err)
+		return
+	}
+
+	// Check if dist has actual files (not just .gitkeep)
+	if _, err := fs.Stat(sub, "index.html"); err != nil {
+		log.Println("no index.html in dist, skipping frontend serve")
+		return
+	}
+
+	fileServer := http.FileServer(http.FS(sub))
+
+	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/assets")
+		fileServer.ServeHTTP(w, r)
+	})
+
+	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/health" {
+			return
+		}
+		data, err := fs.ReadFile(sub, "index.html")
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(data)
+	})
 }

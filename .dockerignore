@@ -1,0 +1,10 @@
+.git
+.gitignore
+*.md
+backend/finance.db
+backend/finance.db-wal
+backend/finance.db-shm
+backend/golden-financier
+backend/server
+frontend/node_modules
+frontend/.env

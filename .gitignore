@@ -1,0 +1,25 @@
+# Go
+backend/server
+backend/dist/*
+!backend/dist/.gitkeep
+backend/.env
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Setup scripts
+install-go.sh
+
+# Secrets
+*.env
+.env.local

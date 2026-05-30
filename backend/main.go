@@ -11,6 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
 
+	"golden-financier/handler"
 	"golden-financier/migrate"
 )
 
@@ -29,7 +30,6 @@ func main() {
 	if err := migrate.Run(db.DB); err != nil {
 		log.Fatalf("migrate: %v", err)
 	}
-
 	log.Println("migrations applied")
 
 	r := chi.NewRouter()
@@ -45,6 +45,42 @@ func main() {
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
+	})
+
+	ah := &handler.AccountHandler{DB: db}
+	ch := &handler.CategoryHandler{DB: db}
+	th := &handler.TransactionHandler{DB: db}
+	rh := &handler.ReportHandler{DB: db}
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Route("/accounts", func(r chi.Router) {
+			r.Get("/", ah.List)
+			r.Post("/", ah.Create)
+			r.Get("/{id}", ah.Get)
+			r.Put("/{id}", ah.Update)
+			r.Delete("/{id}", ah.Archive)
+		})
+
+		r.Route("/categories", func(r chi.Router) {
+			r.Get("/", ch.List)
+			r.Post("/", ch.Create)
+			r.Get("/{id}", ch.Get)
+			r.Put("/{id}", ch.Update)
+			r.Delete("/{id}", ch.Delete)
+		})
+
+		r.Route("/transactions", func(r chi.Router) {
+			r.Get("/", th.List)
+			r.Post("/", th.Create)
+			r.Get("/{id}", th.Get)
+			r.Put("/{id}", th.Update)
+			r.Delete("/{id}", th.Delete)
+		})
+
+		r.Route("/reports", func(r chi.Router) {
+			r.Get("/monthly", rh.Monthly)
+			r.Get("/net-worth", rh.NetWorth)
+		})
 	})
 
 	port := os.Getenv("PORT")

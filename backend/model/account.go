@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -21,6 +20,9 @@ type Account struct {
 func CreateAccount(db *sqlx.DB, a *Account) error {
 	a.ID = ulid.Make().String()
 	a.CreatedAt = time.Now().UTC().Format(time.RFC3339)
+	if a.Currency == "" {
+		a.Currency = "IDR"
+	}
 	_, err := db.Exec(
 		`INSERT INTO accounts (id, name, type, balance_cents, currency, created_at, archived)
 		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -63,11 +65,4 @@ func ArchiveAccount(db *sqlx.DB, id string) error {
 func UpdateAccountBalance(db *sqlx.DB, accountID string, delta int64) error {
 	_, err := db.Exec("UPDATE accounts SET balance_cents = balance_cents + ? WHERE id = ?", delta, accountID)
 	return err
-}
-
-func NullString(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{Valid: false}
-	}
-	return sql.NullString{String: s, Valid: true}
 }

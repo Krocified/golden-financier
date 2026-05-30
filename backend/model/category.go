@@ -6,18 +6,18 @@ import (
 )
 
 type Category struct {
-	ID       string `db:"id" json:"id"`
-	Name     string `db:"name" json:"name"`
-	ParentID string `db:"parent_id" json:"parent_id,omitempty"`
-	Icon     string `db:"icon" json:"icon"`
-	Color    string `db:"color" json:"color"`
+	ID       string  `db:"id" json:"id"`
+	Name     string  `db:"name" json:"name"`
+	ParentID *string `db:"parent_id" json:"parent_id,omitempty"`
+	Icon     string  `db:"icon" json:"icon"`
+	Color    string  `db:"color" json:"color"`
 }
 
 func CreateCategory(db *sqlx.DB, c *Category) error {
 	c.ID = ulid.Make().String()
 	_, err := db.Exec(
 		`INSERT INTO categories (id, name, parent_id, icon, color) VALUES (?, ?, ?, ?, ?)`,
-		c.ID, c.Name, NullString(c.ParentID), c.Icon, c.Color,
+		c.ID, c.Name, c.ParentID, c.Icon, c.Color,
 	)
 	return err
 }
@@ -43,7 +43,7 @@ func ListCategories(db *sqlx.DB) ([]Category, error) {
 func UpdateCategory(db *sqlx.DB, c *Category) error {
 	_, err := db.Exec(
 		`UPDATE categories SET name = ?, parent_id = ?, icon = ?, color = ? WHERE id = ?`,
-		c.Name, NullString(c.ParentID), c.Icon, c.Color, c.ID,
+		c.Name, c.ParentID, c.Icon, c.Color, c.ID,
 	)
 	return err
 }

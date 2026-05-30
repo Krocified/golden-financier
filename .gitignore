@@ -8,10 +8,6 @@ backend/golden-financier
 *.db-wal
 *.db-journal
 
-# Embedded frontend dist
-backend/dist/*
-!backend/dist/.gitkeep
-
 # Env
 backend/.env
 

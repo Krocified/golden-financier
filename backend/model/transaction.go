@@ -10,15 +10,15 @@ import (
 )
 
 type Transaction struct {
-	ID          string `db:"id" json:"id"`
-	AccountID   string `db:"account_id" json:"account_id"`
-	Date        string `db:"date" json:"date"`
-	AmountCents int64  `db:"amount_cents" json:"amount_cents"`
-	Payee       string `db:"payee" json:"payee"`
-	CategoryID  string `db:"category_id" json:"category_id,omitempty"`
-	Notes       string `db:"notes" json:"notes"`
-	Reconciled  bool   `db:"reconciled" json:"reconciled"`
-	CreatedAt   string `db:"created_at" json:"created_at"`
+	ID          string  `db:"id" json:"id"`
+	AccountID   string  `db:"account_id" json:"account_id"`
+	Date        string  `db:"date" json:"date"`
+	AmountCents int64   `db:"amount_cents" json:"amount_cents"`
+	Payee       string  `db:"payee" json:"payee"`
+	CategoryID  *string `db:"category_id" json:"category_id,omitempty"`
+	Notes       string  `db:"notes" json:"notes"`
+	Reconciled  bool    `db:"reconciled" json:"reconciled"`
+	CreatedAt   string  `db:"created_at" json:"created_at"`
 }
 
 type ListTransactionsFilter struct {
@@ -40,7 +40,7 @@ func CreateTransaction(db *sqlx.DB, t *Transaction) error {
 		`INSERT INTO transactions (id, account_id, date, amount_cents, payee, category_id, notes, reconciled, created_at)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		t.ID, t.AccountID, t.Date, t.AmountCents, t.Payee,
-		NullString(t.CategoryID), t.Notes, t.Reconciled, t.CreatedAt,
+		t.CategoryID, t.Notes, t.Reconciled, t.CreatedAt,
 	)
 	if err != nil {
 		return fmt.Errorf("insert transaction: %w", err)
@@ -106,7 +106,7 @@ func UpdateTransaction(db *sqlx.DB, t *Transaction) error {
 		`UPDATE transactions SET account_id = ?, date = ?, amount_cents = ?, payee = ?,
 		 category_id = ?, notes = ?, reconciled = ? WHERE id = ?`,
 		t.AccountID, t.Date, t.AmountCents, t.Payee,
-		NullString(t.CategoryID), t.Notes, t.Reconciled, t.ID,
+		t.CategoryID, t.Notes, t.Reconciled, t.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("update transaction: %w", err)

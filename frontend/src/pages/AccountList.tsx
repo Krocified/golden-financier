@@ -43,7 +43,7 @@ export function AccountList() {
       const payload = {
         name: form.name,
         type: form.type as Account['type'],
-        balance_cents: form.balance_cents ? Math.round(Number(form.balance_cents)) : 0,
+        balance_cents: form.balance_cents ? Math.round(Number(form.balance_cents) * 100) : 0,
       }
 
       if (editId) {
@@ -69,7 +69,7 @@ export function AccountList() {
       setForm({
         name: a.name,
         type: a.type,
-        balance_cents: String(Math.abs(a.balance_cents)),
+        balance_cents: String(Math.abs(a.balance_cents) / 100),
       })
       setEditId(id)
       setShowForm(true)

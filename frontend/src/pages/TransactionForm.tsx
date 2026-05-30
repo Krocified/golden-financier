@@ -35,7 +35,7 @@ export function TransactionForm() {
           setForm({
             account_id: tran.account_id,
             date: tran.date,
-            amount_cents: String(Math.abs(tran.amount_cents)),
+            amount_cents: String(Math.abs(tran.amount_cents) / 100),
             payee: tran.payee,
             category_id: tran.category_id ?? '',
             notes: tran.notes,
@@ -52,7 +52,7 @@ export function TransactionForm() {
       return
     }
 
-    const amount = Math.round(Number(form.amount_cents))
+    const amount = Math.round(Number(form.amount_cents) * 100)
     if (isNaN(amount) || amount <= 0) {
       toast.error(t('transactions.amount_must_be_positive'))
       return

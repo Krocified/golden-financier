@@ -1,7 +1,18 @@
-# Go
+# Go binaries
 backend/server
+backend/golden-financier
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Embedded frontend dist
 backend/dist/*
 !backend/dist/.gitkeep
+
+# Env
 backend/.env
 
 # Node / Frontend

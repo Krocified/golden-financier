@@ -1,0 +1,111 @@
+{
+  "nav": {
+    "dashboard": "Dasbor",
+    "transactions": "Transaksi",
+    "accounts": "Rekening",
+    "categories": "Kategori",
+    "reports": "Laporan"
+  },
+  "common": {
+    "add": "Tambah",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "saving": "Menyimpan...",
+    "loading": "Memuat...",
+    "view_all": "Lihat Semua \u2192",
+    "save_changes": "Simpan Perubahan",
+    "no_data": "Tidak ada data",
+    "language": "Bahasa"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "net_worth": "Total Kekayaan Bersih",
+    "income": "Pemasukan",
+    "expenses": "Pengeluaran",
+    "accounts": "Rekening",
+    "recent_transactions": "Transaksi Terbaru",
+    "no_accounts": "BELUM ADA REKENING",
+    "no_transactions": "BELUM ADA TRANSAKSI"
+  },
+  "transactions": {
+    "title": "Transaksi",
+    "new_transaction": "Transaksi Baru",
+    "edit_transaction": "Edit Transaksi",
+    "all_accounts": "Semua Rekening",
+    "no_transactions": "TIDAK ADA TRANSAKSI",
+    "required_fields": "Lengkapi semua field wajib",
+    "amount_must_be_positive": "Jumlah harus angka positif",
+    "saved": "Transaksi ditambahkan",
+    "updated": "Transaksi diperbarui",
+    "save_failed": "Gagal menyimpan",
+    "fields": {
+      "account": "Rekening",
+      "date": "Tanggal",
+      "amount": "Jumlah",
+      "payee": "Penerima",
+      "category": "Kategori",
+      "notes": "Catatan",
+      "no_category": "Tanpa kategori",
+      "select_account": "Pilih rekening",
+      "payee_placeholder": "Nama merchant atau penerima",
+      "notes_placeholder": "Catatan tambahan..."
+    }
+  },
+  "accounts": {
+    "title": "Rekening",
+    "new_account": "Rekening Baru",
+    "edit_account": "Edit Rekening",
+    "total_balance": "Total Saldo",
+    "no_accounts": "BELUM ADA REKENING",
+    "saved": "Rekening ditambahkan",
+    "deleted": "Rekening diarsipkan",
+    "save_failed": "Gagal menyimpan",
+    "delete_failed": "Gagal menghapus",
+    "name_required": "Nama rekening wajib diisi",
+    "fields": {
+      "name": "Nama rekening",
+      "name_placeholder": "Nama rekening",
+      "type": "Tipe",
+      "balance": "Saldo",
+      "balance_placeholder": "Saldo awal"
+    },
+    "types": {
+      "checking": "Tabungan",
+      "savings": "Deposito",
+      "credit_card": "Kartu Kredit",
+      "cash": "Tunai",
+      "investment": "Investasi",
+      "loan": "Pinjaman"
+    }
+  },
+  "categories": {
+    "title": "Kategori",
+    "new_category": "Kategori Baru",
+    "edit_category": "Edit Kategori",
+    "no_categories": "BELUM ADA KATEGORI",
+    "saved": "Kategori ditambahkan",
+    "deleted": "Kategori dihapus",
+    "save_failed": "Gagal menyimpan",
+    "delete_failed": "Gagal menghapus",
+    "name_required": "Nama kategori wajib diisi",
+    "fields": {
+      "name": "Nama kategori",
+      "name_placeholder": "Nama kategori",
+      "parent": "Kategori induk",
+      "no_parent": "Kategori utama",
+      "icon": "Ikon",
+      "color": "Warna"
+    }
+  },
+  "reports": {
+    "title": "Laporan",
+    "income": "Pemasukan",
+    "expenses": "Pengeluaran",
+    "spending_by_category": "Pengeluaran per Kategori",
+    "category_breakdown": "Rincian Kategori",
+    "no_expenses": "TIDAK ADA PENGELUARAN",
+    "loading": "MEMUAT..."
+  }
+}

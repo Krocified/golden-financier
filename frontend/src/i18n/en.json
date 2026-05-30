@@ -1,0 +1,111 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "accounts": "Accounts",
+    "categories": "Categories",
+    "reports": "Reports"
+  },
+  "common": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "view_all": "View All \u2192",
+    "save_changes": "Save Changes",
+    "no_data": "No data",
+    "language": "Language"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "net_worth": "Net Worth",
+    "income": "Income",
+    "expenses": "Expenses",
+    "accounts": "Accounts",
+    "recent_transactions": "Recent Transactions",
+    "no_accounts": "NO ACCOUNTS YET",
+    "no_transactions": "NO TRANSACTIONS YET"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "new_transaction": "New Transaction",
+    "edit_transaction": "Edit Transaction",
+    "all_accounts": "All Accounts",
+    "no_transactions": "NO TRANSACTIONS",
+    "required_fields": "Fill in all required fields",
+    "amount_must_be_positive": "Amount must be a positive number",
+    "saved": "Transaction saved",
+    "updated": "Transaction updated",
+    "save_failed": "Failed to save",
+    "fields": {
+      "account": "Account",
+      "date": "Date",
+      "amount": "Amount",
+      "payee": "Payee",
+      "category": "Category",
+      "notes": "Notes",
+      "no_category": "No category",
+      "select_account": "Select account",
+      "payee_placeholder": "Merchant or recipient name",
+      "notes_placeholder": "Optional notes"
+    }
+  },
+  "accounts": {
+    "title": "Accounts",
+    "new_account": "New Account",
+    "edit_account": "Edit Account",
+    "total_balance": "Total Balance",
+    "no_accounts": "NO ACCOUNTS YET",
+    "saved": "Account saved",
+    "deleted": "Account archived",
+    "save_failed": "Failed to save",
+    "delete_failed": "Failed to delete",
+    "name_required": "Account name is required",
+    "fields": {
+      "name": "Account name",
+      "name_placeholder": "Account name",
+      "type": "Type",
+      "balance": "Balance",
+      "balance_placeholder": "Initial balance"
+    },
+    "types": {
+      "checking": "Checking",
+      "savings": "Savings",
+      "credit_card": "Credit Card",
+      "cash": "Cash",
+      "investment": "Investment",
+      "loan": "Loan"
+    }
+  },
+  "categories": {
+    "title": "Categories",
+    "new_category": "New Category",
+    "edit_category": "Edit Category",
+    "no_categories": "NO CATEGORIES YET",
+    "saved": "Category saved",
+    "deleted": "Category deleted",
+    "save_failed": "Failed to save",
+    "delete_failed": "Failed to delete",
+    "name_required": "Category name is required",
+    "fields": {
+      "name": "Category name",
+      "name_placeholder": "Category name",
+      "parent": "Parent category",
+      "no_parent": "Main category",
+      "icon": "Icon",
+      "color": "Color"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "income": "Income",
+    "expenses": "Expenses",
+    "spending_by_category": "Spending by Category",
+    "category_breakdown": "Category Breakdown",
+    "no_expenses": "NO EXPENSES",
+    "loading": "LOADING..."
+  }
+}

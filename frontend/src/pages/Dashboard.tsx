@@ -1,12 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { useNavigate } from 'react-router-dom'
 import { useAccounts, useTransactions, useMonthlyReport } from '@/hooks/useData'
 import { formatIDR, formatDate, getCurrentMonth } from '@/lib/format'
+import { useLanguage } from '@/i18n/context'
 import { Plus, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const month = getCurrentMonth()
   const { data: accounts } = useAccounts()
   const { data: transactions } = useTransactions({ month })
@@ -16,119 +16,105 @@ export function Dashboard() {
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Dashboard</h2>
-        <span className="text-sm text-muted">{month}</span>
+        <h2 className="text-xl font-bold uppercase tracking-tight">{t('dashboard.title')}</h2>
+        <span className="brutal-badge">{month}</span>
       </div>
 
-      {/* Net Worth Card */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-muted font-normal">
-            Total Kekayaan Bersih
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{formatIDR(totalNetWorth)}</p>
-        </CardContent>
-      </Card>
+      <div className="brutal-card p-4">
+        <p className="text-xs font-bold uppercase tracking-wider text-black/60">{t('dashboard.net_worth')}</p>
+        <p className="text-3xl font-bold mt-1">{formatIDR(totalNetWorth)}</p>
+      </div>
 
-      {/* Month Summary Cards */}
       {report && (
         <div className="grid grid-cols-2 gap-3">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-sm text-muted mb-1">
-                <TrendingUp size={16} className="text-positive" />
-                Pemasukan
-              </div>
-              <p className="text-lg font-semibold text-positive">
-                {formatIDR(report.summary.income_cents)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-sm text-muted mb-1">
-                <TrendingDown size={16} className="text-negative" />
-                Pengeluaran
-              </div>
-              <p className="text-lg font-semibold text-negative">
-                {formatIDR(Math.abs(report.summary.expense_cents))}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="brutal-card p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black/60 mb-1">
+              <TrendingUp size={14} />
+              {t('dashboard.income')}
+            </div>
+            <p className="text-xl font-bold text-hot-red">{formatIDR(report.summary.income_cents)}</p>
+          </div>
+          <div className="brutal-card p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black/60 mb-1">
+              <TrendingDown size={14} />
+              {t('dashboard.expenses')}
+            </div>
+            <p className="text-xl font-bold">{formatIDR(Math.abs(report.summary.expense_cents))}</p>
+          </div>
         </div>
       )}
 
-      {/* Account List */}
       <div>
-        <h3 className="text-sm font-semibold text-muted mb-2">Rekening</h3>
-        <div className="space-y-2">
-          {accounts?.map((a) => (
-            <Card key={a.id} className="hover:bg-card-hover cursor-pointer transition-colors" onClick={() => navigate('/accounts')}>
-              <CardContent className="py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Wallet size={18} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{a.name}</p>
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      {a.type.replace('_', ' ')}
-                    </Badge>
-                  </div>
+        <h3 className="text-sm font-bold uppercase tracking-wide mb-3">{t('dashboard.accounts')}</h3>
+        <div className="space-y-3">
+          {accounts?.map((a, i) => (
+            <div
+              key={a.id}
+              onClick={() => navigate('/accounts')}
+              className="brutal-card p-3 flex items-center justify-between cursor-pointer"
+              style={{ transform: i % 2 === 0 ? 'rotate(-0.5deg)' : 'rotate(0.5deg)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-soft-violet border-2 border-black flex items-center justify-center">
+                  <Wallet size={18} />
                 </div>
-                <p className="font-semibold text-sm">{formatIDR(a.balance_cents)}</p>
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="font-bold text-sm">{a.name}</p>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-black/50">
+                    {a.type.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
+              <p className="font-bold text-sm">{formatIDR(a.balance_cents)}</p>
+            </div>
           ))}
-          {accounts?.length === 0 && (
-            <p className="text-sm text-muted text-center py-4">
-              Belum ada rekening. Tambahkan rekening pertama Anda.
+          {(!accounts || accounts.length === 0) && (
+            <p className="text-sm font-bold text-center py-6 border-2 border-black p-4 bg-white">
+              {t('dashboard.no_accounts')}
             </p>
           )}
         </div>
       </div>
 
-      {/* Recent Transactions */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-muted">Transaksi Terbaru</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-bold uppercase tracking-wide">{t('dashboard.recent_transactions')}</h3>
           <button
             onClick={() => navigate('/transactions')}
-            className="text-xs text-primary font-medium"
+            className="text-xs font-bold underline underline-offset-2"
           >
-            Lihat Semua
+            {t('common.view_all')}
           </button>
         </div>
-        <div className="space-y-1">
-          {transactions?.slice(0, 5).map((t) => (
-            <Card key={t.id} className="hover:bg-card-hover cursor-pointer transition-colors" onClick={() => navigate(`/transactions/${t.id}/edit`)}>
-              <CardContent className="py-2.5 flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{t.payee}</p>
-                  <p className="text-[11px] text-muted">{formatDate(t.date)}</p>
-                </div>
-                <p className={`text-sm font-semibold ml-3 ${t.amount_cents >= 0 ? 'text-positive' : 'text-negative'}`}>
-                  {t.amount_cents >= 0 ? '+' : ''}{formatIDR(t.amount_cents)}
-                </p>
-              </CardContent>
-            </Card>
+        <div className="space-y-3">
+          {transactions?.slice(0, 5).map((tran, i) => (
+            <div
+              key={tran.id}
+              onClick={() => navigate(`/transactions/${tran.id}/edit`)}
+              className="brutal-card p-3 flex items-center justify-between cursor-pointer"
+              style={{ transform: i % 2 === 0 ? 'rotate(0.3deg)' : 'rotate(-0.3deg)' }}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm truncate">{tran.payee}</p>
+                <p className="text-xs font-bold text-black/50">{formatDate(tran.date)}</p>
+              </div>
+              <p className="font-bold text-sm ml-3">
+                {tran.amount_cents >= 0 ? '+' : ''}{formatIDR(tran.amount_cents)}
+              </p>
+            </div>
           ))}
-          {transactions?.length === 0 && (
-            <p className="text-sm text-muted text-center py-4">
-              Belum ada transaksi bulan ini.
+          {(!transactions || transactions.length === 0) && (
+            <p className="text-sm font-bold text-center py-6 border-2 border-black p-4 bg-white">
+              {t('dashboard.no_transactions')}
             </p>
           )}
         </div>
       </div>
 
-      {/* FAB */}
       <button
         onClick={() => navigate('/transactions/new')}
-        className="fixed bottom-20 right-4 md:bottom-6 z-20 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
+        className="brutal-btn brutal-btn-yellow fixed bottom-20 right-4 md:bottom-6 z-20 w-14 h-14 flex items-center justify-center text-xl"
       >
         <Plus size={24} />
       </button>

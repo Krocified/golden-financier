@@ -4,13 +4,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api, type Transaction } from '@/api/client'
 import { useAccounts, useCategories } from '@/hooks/useData'
+import { useLanguage } from '@/i18n/context'
 import { ArrowLeft } from 'lucide-react'
-
 
 export function TransactionForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { t } = useLanguage()
   const isEdit = !!id
 
   const { data: accounts } = useAccounts()
@@ -29,15 +30,15 @@ export function TransactionForm() {
   useEffect(() => {
     if (isEdit && id) {
       api.transactions.list().then((txns) => {
-        const t = txns.find((tx: Transaction) => tx.id === id)
-        if (t) {
+        const tran = txns.find((tx: Transaction) => tx.id === id)
+        if (tran) {
           setForm({
-            account_id: t.account_id,
-            date: t.date,
-            amount_cents: String(Math.abs(t.amount_cents)),
-            payee: t.payee,
-            category_id: t.category_id ?? '',
-            notes: t.notes,
+            account_id: tran.account_id,
+            date: tran.date,
+            amount_cents: String(Math.abs(tran.amount_cents)),
+            payee: tran.payee,
+            category_id: tran.category_id ?? '',
+            notes: tran.notes,
           })
         }
       })
@@ -47,13 +48,13 @@ export function TransactionForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.account_id || !form.payee || !form.amount_cents) {
-      toast.error('Lengkapi semua field wajib')
+      toast.error(t('transactions.required_fields'))
       return
     }
 
     const amount = Math.round(Number(form.amount_cents))
     if (isNaN(amount) || amount <= 0) {
-      toast.error('Jumlah harus angka positif')
+      toast.error(t('transactions.amount_must_be_positive'))
       return
     }
 
@@ -70,10 +71,10 @@ export function TransactionForm() {
 
       if (isEdit && id) {
         await api.transactions.update(id, payload)
-        toast.success('Transaksi diperbarui')
+        toast.success(t('transactions.updated'))
       } else {
         await api.transactions.create(payload)
-        toast.success('Transaksi ditambahkan')
+        toast.success(t('transactions.saved'))
       }
 
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
@@ -81,7 +82,7 @@ export function TransactionForm() {
       queryClient.invalidateQueries({ queryKey: ['report'] })
       navigate('/transactions')
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Gagal menyimpan')
+      toast.error(t('transactions.save_failed'))
     } finally {
       setLoading(false)
     }
@@ -89,112 +90,105 @@ export function TransactionForm() {
 
   return (
     <div className="p-4 space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-1 hover:bg-card-hover rounded-lg">
-          <ArrowLeft size={20} />
+        <button onClick={() => navigate(-1)} className="brutal-border-2 p-2 bg-white hover:bg-soft-violet transition-colors">
+          <ArrowLeft size={18} />
         </button>
-        <h2 className="text-lg font-semibold">
-          {isEdit ? 'Edit Transaksi' : 'Transaksi Baru'}
+        <h2 className="text-xl font-bold uppercase tracking-tight">
+          {isEdit ? t('transactions.edit_transaction') : t('transactions.new_transaction')}
         </h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Account */}
         <div>
-          <label className="text-sm font-medium mb-1 block">Rekening *</label>
+          <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.account')} *</label>
           <select
             value={form.account_id}
             onChange={(e) => setForm({ ...form, account_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-white"
+            className="brutal-select w-full px-3 py-2.5 text-sm font-bold"
             required
           >
-            <option value="">Pilih rekening</option>
+            <option value="">{t('transactions.fields.select_account')}</option>
             {accounts?.map((a) => (
               <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Date */}
-        <div>
-          <label className="text-sm font-medium mb-1 block">Tanggal *</label>
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-white"
-            required
-          />
-        </div>
-
-        {/* Amount */}
-        <div>
-          <label className="text-sm font-medium mb-1 block">Jumlah (IDR) *</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted">Rp</span>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.date')} *</label>
             <input
-              type="number"
-              value={form.amount_cents}
-              onChange={(e) => setForm({ ...form, amount_cents: e.target.value })}
-              placeholder="0"
-              className="w-full pl-10 pr-3 py-2.5 text-sm border border-border rounded-lg bg-white"
-              min="1"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              className="brutal-input w-full px-3 py-2.5 text-sm font-bold"
               required
             />
           </div>
-          <p className="text-[11px] text-muted mt-1">Nilai positif. Akan otomatis dicatat sebagai pengeluaran.</p>
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.amount')} *</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold">Rp</span>
+              <input
+                type="number"
+                value={form.amount_cents}
+                onChange={(e) => setForm({ ...form, amount_cents: e.target.value })}
+                placeholder="0"
+                className="brutal-input w-full pl-10 pr-3 py-2.5 text-sm font-bold"
+                min="1"
+                required
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Payee */}
         <div>
-          <label className="text-sm font-medium mb-1 block">Penerima *</label>
+          <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.payee')} *</label>
           <input
             type="text"
             value={form.payee}
             onChange={(e) => setForm({ ...form, payee: e.target.value })}
-            placeholder="Nama merchant atau penerima"
-            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-white"
+            placeholder={t('transactions.fields.payee_placeholder')}
+            className="brutal-input w-full px-3 py-2.5 text-sm font-bold"
             required
           />
         </div>
 
-        {/* Category */}
-        <div>
-          <label className="text-sm font-medium mb-1 block">Kategori</label>
-          <select
-            value={form.category_id}
-            onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-white"
-          >
-            <option value="">Tanpa kategori</option>
-            {categories?.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {c.name}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.category')}</label>
+            <select
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+              className="brutal-select w-full px-3 py-2.5 text-sm font-bold"
+            >
+              <option value="">{t('transactions.fields.no_category')}</option>
+              {categories?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider mb-1.5 block">{t('transactions.fields.notes')}</label>
+            <input
+              type="text"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder={t('transactions.fields.notes_placeholder')}
+              className="brutal-input w-full px-3 py-2.5 text-sm font-bold"
+            />
+          </div>
         </div>
 
-        {/* Notes */}
-        <div>
-          <label className="text-sm font-medium mb-1 block">Catatan</label>
-          <textarea
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            placeholder="Catatan tambahan..."
-            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-white resize-none"
-            rows={3}
-          />
-        </div>
-
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+          className="brutal-btn w-full py-3 text-sm font-bold uppercase tracking-wider"
         >
-          {loading ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Tambah Transaksi'}
+          {loading ? t('common.saving') : isEdit ? t('common.save_changes') : t('common.save')}
         </button>
       </form>
     </div>

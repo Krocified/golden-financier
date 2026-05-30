@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useMonthlyReport } from '@/hooks/useData'
+import { useLanguage } from '@/i18n/context'
 import { formatIDR, getCurrentMonth } from '@/lib/format'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 
 export function Reports() {
+  const { t } = useLanguage()
   const month = getCurrentMonth()
   const [selectedMonth, setSelectedMonth] = useState(month)
   const { data: report } = useMonthlyReport(selectedMonth)
@@ -23,110 +24,91 @@ export function Reports() {
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Laporan</h2>
+        <h2 className="text-xl font-bold uppercase tracking-tight">{t('reports.title')}</h2>
         <input
           type="month"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
-          className="px-3 py-1.5 text-sm border border-border rounded-lg bg-white"
+          className="brutal-input px-3 py-2 text-sm font-bold"
         />
       </div>
 
-      {/* Summary */}
       {report && (
         <div className="grid grid-cols-2 gap-3">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-sm text-muted mb-1">
-                <TrendingUp size={16} className="text-positive" />
-                Pemasukan
-              </div>
-              <p className="text-lg font-semibold text-positive">
-                {formatIDR(report.summary.income_cents)}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2 text-sm text-muted mb-1">
-                <TrendingDown size={16} className="text-negative" />
-                Pengeluaran
-              </div>
-              <p className="text-lg font-semibold text-negative">
-                {formatIDR(Math.abs(report.summary.expense_cents))}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="brutal-card p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black/60 mb-1">
+              <TrendingUp size={14} />
+              {t('reports.income')}
+            </div>
+            <p className="text-xl font-bold">{formatIDR(report.summary.income_cents)}</p>
+          </div>
+          <div className="brutal-card p-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black/60 mb-1">
+              <TrendingDown size={14} />
+              {t('reports.expenses')}
+            </div>
+            <p className="text-xl font-bold">{formatIDR(Math.abs(report.summary.expense_cents))}</p>
+          </div>
         </div>
       )}
 
-      {/* Donut Chart */}
       {chartData.length > 0 && (
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-medium">Pengeluaran per Kategori</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => formatIDR(Number(value))}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="brutal-card p-4">
+          <h3 className="text-sm font-bold uppercase tracking-wide mb-3">{t('reports.spending_by_category')}</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="#000"
+                  strokeWidth={2}
+                >
+                  {chartData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) => formatIDR(Number(value))}
+                  contentStyle={{ border: '2px solid #000', borderRadius: 0, background: '#FFFDF5' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
 
-      {/* Category Breakdown List */}
       {chartData.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Rincian Kategori</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <div className="brutal-card p-4">
+          <h3 className="text-sm font-bold uppercase tracking-wide mb-3">{t('reports.category_breakdown')}</h3>
+          <div className="space-y-2">
             {chartData.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between py-1">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div
-                    className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm truncate">
-                    {item.icon} {item.name}
-                  </span>
+                  <div className="w-3 h-3 border border-black" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm font-bold truncate">{item.icon} {item.name}</span>
                 </div>
-                <span className="text-sm font-medium ml-3">{formatIDR(item.value)}</span>
+                <span className="text-sm font-bold ml-3">{formatIDR(item.value)}</span>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {chartData.length === 0 && report && (
-        <p className="text-sm text-muted text-center py-8">
-          Tidak ada data pengeluaran untuk bulan ini.
+        <p className="text-sm font-bold text-center py-8 border-2 border-black p-4 bg-white">
+          {t('reports.no_expenses')}
         </p>
       )}
 
       {!report && (
-        <p className="text-sm text-muted text-center py-8">
-          Memuat data...
+        <p className="text-sm font-bold text-center py-8 border-2 border-black p-4 bg-white">
+          {t('reports.loading')}
         </p>
       )}
     </div>

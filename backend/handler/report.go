@@ -13,13 +13,14 @@ type ReportHandler struct {
 }
 
 func (h *ReportHandler) Monthly(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	month := r.URL.Query().Get("month")
 	if month == "" {
 		respondError(w, http.StatusBadRequest, "month query param required (YYYY-MM)")
 		return
 	}
 
-	reports, summary, err := model.GetMonthlyReport(h.DB, month)
+	reports, summary, err := model.GetMonthlyReport(h.DB, month, userID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -32,7 +33,8 @@ func (h *ReportHandler) Monthly(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ReportHandler) NetWorth(w http.ResponseWriter, r *http.Request) {
-	points, err := model.GetNetWorthHistory(h.DB)
+	userID := UserFromContext(r.Context()).UserID
+	points, err := model.GetNetWorthHistory(h.DB, userID)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return

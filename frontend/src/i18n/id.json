@@ -100,6 +100,18 @@
       "color": "Warna"
     }
   },
+  "auth": {
+    "login": "Masuk",
+    "register": "Daftar",
+    "logout": "Keluar",
+    "email": "Email",
+    "password": "Kata Sandi",
+    "name": "Nama",
+    "password_hint": "Minimal 8 karakter",
+    "password_too_short": "Kata sandi minimal 8 karakter",
+    "no_account": "Belum punya akun?",
+    "has_account": "Sudah punya akun?"
+  },
   "reports": {
     "title": "Laporan",
     "income": "Pemasukan",

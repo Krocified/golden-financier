@@ -7,7 +7,7 @@ cd "$DIR"
 if [ ! -f .env ]; then
   if [ -f .env.example ]; then
     cp .env.example .env
-    echo "→ Created .env from .env.example — edit VITE_AUTH_TOKEN to match backend"
+    echo "→ Created .env from .env.example"
   fi
 fi
 

@@ -7,7 +7,7 @@ cd "$DIR"
 # ─── Config ──────────────────────────────────────────────
 APP_NAME="${FLY_APP_NAME:-golden-financier}"
 REGION="${FLY_REGION:-sin}"            # Singapore — closest to Indonesia
-AUTH_TOKEN="${AUTH_TOKEN:-}"
+JWT_SECRET="${JWT_SECRET:-}"
 
 # ─── Colors ──────────────────────────────────────────────
 BOLD='\033[1m'
@@ -52,21 +52,15 @@ fi
 info "Validating frontend build..."
 (cd frontend && npm install --silent && npm run build) || error "Frontend build failed"
 
-# 4. Set AUTH_TOKEN (with fallback)
-if [ -z "$AUTH_TOKEN" ]; then
-  if [ -f frontend/.env ]; then
-    AUTH_TOKEN="$(grep -oP 'VITE_AUTH_TOKEN=\K.*' frontend/.env || true)"
-  fi
-  if [ -z "$AUTH_TOKEN" ]; then
-    AUTH_TOKEN="$(openssl rand -hex 32)"
-    warn "No AUTH_TOKEN found. Generated: ${AUTH_TOKEN}"
-    warn "Set VITE_AUTH_TOKEN=${AUTH_TOKEN} in frontend/.env for local dev"
-  fi
+# 5. Set JWT_SECRET (persistent signing key for auth tokens)
+if [ -z "$JWT_SECRET" ]; then
+  JWT_SECRET="$(openssl rand -hex 32)"
+  info "Generated JWT_SECRET: ${JWT_SECRET}"
 fi
 
 # ─── Fly.io setup ────────────────────────────────────────
 
-# 5. Create app if it doesn't exist
+# 6. Create app if it doesn't exist
 if ! $FLY apps list 2>/dev/null | grep -q "$APP_NAME"; then
   info "Creating Fly app: $APP_NAME"
   $FLY apps create "$APP_NAME"
@@ -74,9 +68,9 @@ else
   info "App $APP_NAME already exists"
 fi
 
-# 6. Set secrets
-info "Setting AUTH_TOKEN secret..."
-$FLY secrets set AUTH_TOKEN="$AUTH_TOKEN" --app "$APP_NAME"
+# 7. Set secrets
+info "Setting JWT_SECRET secret..."
+$FLY secrets set JWT_SECRET="$JWT_SECRET" --app "$APP_NAME"
 
 # 7. Create volume if it doesn't exist
 if ! $FLY volumes list --app "$APP_NAME" 2>/dev/null | grep -q "data"; then
@@ -93,7 +87,6 @@ $FLY deploy --app "$APP_NAME" --strategy immediate
 echo ""
 echo -e "${BOLD}${GREEN}✔${NC} Deployed!"
 echo "   App:    https://$APP_NAME.fly.dev"
-echo "   Token:  $AUTH_TOKEN"
+echo "   JWT_SECRET:  $JWT_SECRET"
 echo ""
-echo "  For local dev, set in frontend/.env:"
-echo "  VITE_AUTH_TOKEN=${AUTH_TOKEN}"
+echo "  For local dev, set JWT_SECRET=... in backend/.env"

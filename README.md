@@ -19,7 +19,8 @@ cd backend
 
 # Frontend (separate terminal)
 cd frontend
-cp .env.example .env  # set VITE_AUTH_TOKEN to match backend
+cp .env.example .env
+# Register/login at http://localhost:5173 to get a JWT token
 ./run.sh              # starts on :5173
 ```
 

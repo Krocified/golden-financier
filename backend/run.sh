@@ -9,7 +9,7 @@ if [ -f .env ]; then
   set -a; source .env; set +a
 fi
 
-export AUTH_TOKEN="${AUTH_TOKEN:-dev-token}"
+export JWT_SECRET="${JWT_SECRET:-dev-secret-change-in-production}"
 export DATABASE_PATH="${DATABASE_PATH:-./finance.db}"
 
 echo "→ Starting backend on :8080"

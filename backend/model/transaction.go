@@ -19,16 +19,19 @@ type Transaction struct {
 	Notes       string  `db:"notes" json:"notes"`
 	Reconciled  bool    `db:"reconciled" json:"reconciled"`
 	CreatedAt   string  `db:"created_at" json:"created_at"`
+	UserID      string  `db:"user_id" json:"-"`
 }
 
 type ListTransactionsFilter struct {
 	AccountID string
 	Month     string
+	UserID    string
 }
 
-func CreateTransaction(db *sqlx.DB, t *Transaction) error {
+func CreateTransaction(db *sqlx.DB, t *Transaction, userID string) error {
 	t.ID = ulid.Make().String()
 	t.CreatedAt = time.Now().UTC().Format(time.RFC3339)
+	t.UserID = userID
 
 	tx, err := db.Beginx()
 	if err != nil {
@@ -37,10 +40,10 @@ func CreateTransaction(db *sqlx.DB, t *Transaction) error {
 	defer tx.Rollback()
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions (id, account_id, date, amount_cents, payee, category_id, notes, reconciled, created_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO transactions (id, account_id, date, amount_cents, payee, category_id, notes, reconciled, created_at, user_id)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		t.ID, t.AccountID, t.Date, t.AmountCents, t.Payee,
-		t.CategoryID, t.Notes, t.Reconciled, t.CreatedAt,
+		t.CategoryID, t.Notes, t.Reconciled, t.CreatedAt, t.UserID,
 	)
 	if err != nil {
 		return fmt.Errorf("insert transaction: %w", err)
@@ -54,9 +57,9 @@ func CreateTransaction(db *sqlx.DB, t *Transaction) error {
 	return tx.Commit()
 }
 
-func GetTransaction(db *sqlx.DB, id string) (*Transaction, error) {
+func GetTransaction(db *sqlx.DB, id, userID string) (*Transaction, error) {
 	var t Transaction
-	err := db.Get(&t, "SELECT * FROM transactions WHERE id = ?", id)
+	err := db.Get(&t, "SELECT * FROM transactions WHERE id = ? AND "+userScope(""), id, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +70,9 @@ func ListTransactions(db *sqlx.DB, f ListTransactionsFilter) ([]Transaction, err
 	var conditions []string
 	var args []interface{}
 
+	conditions = append(conditions, userScope(""))
+	args = append(args, f.UserID)
+
 	if f.AccountID != "" {
 		conditions = append(conditions, "account_id = ?")
 		args = append(args, f.AccountID)
@@ -76,10 +82,7 @@ func ListTransactions(db *sqlx.DB, f ListTransactionsFilter) ([]Transaction, err
 		args = append(args, f.Month)
 	}
 
-	query := "SELECT * FROM transactions"
-	if len(conditions) > 0 {
-		query += " WHERE " + strings.Join(conditions, " AND ")
-	}
+	query := "SELECT * FROM transactions WHERE " + strings.Join(conditions, " AND ")
 	query += " ORDER BY date DESC, created_at DESC"
 
 	var txns []Transaction
@@ -90,8 +93,8 @@ func ListTransactions(db *sqlx.DB, f ListTransactionsFilter) ([]Transaction, err
 	return txns, nil
 }
 
-func UpdateTransaction(db *sqlx.DB, t *Transaction) error {
-	old, err := GetTransaction(db, t.ID)
+func UpdateTransaction(db *sqlx.DB, t *Transaction, userID string) error {
+	old, err := GetTransaction(db, t.ID, userID)
 	if err != nil {
 		return fmt.Errorf("get old transaction: %w", err)
 	}
@@ -104,9 +107,9 @@ func UpdateTransaction(db *sqlx.DB, t *Transaction) error {
 
 	_, err = tx.Exec(
 		`UPDATE transactions SET account_id = ?, date = ?, amount_cents = ?, payee = ?,
-		 category_id = ?, notes = ?, reconciled = ? WHERE id = ?`,
+		 category_id = ?, notes = ?, reconciled = ? WHERE id = ? AND `+userScope(""),
 		t.AccountID, t.Date, t.AmountCents, t.Payee,
-		t.CategoryID, t.Notes, t.Reconciled, t.ID,
+		t.CategoryID, t.Notes, t.Reconciled, t.ID, userID,
 	)
 	if err != nil {
 		return fmt.Errorf("update transaction: %w", err)
@@ -134,8 +137,8 @@ func UpdateTransaction(db *sqlx.DB, t *Transaction) error {
 	return tx.Commit()
 }
 
-func DeleteTransaction(db *sqlx.DB, id string) error {
-	t, err := GetTransaction(db, id)
+func DeleteTransaction(db *sqlx.DB, id, userID string) error {
+	t, err := GetTransaction(db, id, userID)
 	if err != nil {
 		return fmt.Errorf("get transaction: %w", err)
 	}
@@ -146,7 +149,7 @@ func DeleteTransaction(db *sqlx.DB, id string) error {
 	}
 	defer tx.Rollback()
 
-	_, err = tx.Exec("DELETE FROM transactions WHERE id = ?", id)
+	_, err = tx.Exec("DELETE FROM transactions WHERE id = ? AND "+userScope(""), id, userID)
 	if err != nil {
 		return fmt.Errorf("delete transaction: %w", err)
 	}

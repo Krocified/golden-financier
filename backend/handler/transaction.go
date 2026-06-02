@@ -15,9 +15,11 @@ type TransactionHandler struct {
 }
 
 func (h *TransactionHandler) List(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	f := model.ListTransactionsFilter{
 		AccountID: r.URL.Query().Get("account_id"),
 		Month:     r.URL.Query().Get("month"),
+		UserID:    userID,
 	}
 	txns, err := model.ListTransactions(h.DB, f)
 	if err != nil {
@@ -28,6 +30,7 @@ func (h *TransactionHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	var t model.Transaction
 	if err := decodeJSON(r, &t); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid JSON")
@@ -41,7 +44,7 @@ func (h *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "payee is required")
 		return
 	}
-	if err := model.CreateTransaction(h.DB, &t); err != nil {
+	if err := model.CreateTransaction(h.DB, &t, userID); err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -49,8 +52,9 @@ func (h *TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TransactionHandler) Get(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	id := chi.URLParam(r, "id")
-	t, err := model.GetTransaction(h.DB, id)
+	t, err := model.GetTransaction(h.DB, id, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			respondError(w, http.StatusNotFound, "transaction not found")
@@ -63,6 +67,7 @@ func (h *TransactionHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	id := chi.URLParam(r, "id")
 	var t model.Transaction
 	if err := decodeJSON(r, &t); err != nil {
@@ -70,7 +75,7 @@ func (h *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t.ID = id
-	if err := model.UpdateTransaction(h.DB, &t); err != nil {
+	if err := model.UpdateTransaction(h.DB, &t, userID); err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -78,8 +83,9 @@ func (h *TransactionHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TransactionHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID := UserFromContext(r.Context()).UserID
 	id := chi.URLParam(r, "id")
-	if err := model.DeleteTransaction(h.DB, id); err != nil {
+	if err := model.DeleteTransaction(h.DB, id, userID); err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

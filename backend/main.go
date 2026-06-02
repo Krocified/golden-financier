@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -55,8 +56,21 @@ func main() {
 	th := &handler.TransactionHandler{DB: db}
 	rh := &handler.ReportHandler{DB: db}
 
+	auth := handler.NewAuthHandler(db)
+	authRateLimiter := handler.NewRateLimiter(10, time.Minute)
+	r.Route("/api/v1/auth", func(r chi.Router) {
+		r.Use(authRateLimiter.Middleware)
+		r.Post("/register", auth.Register)
+		r.Post("/login", auth.Login)
+		r.Post("/refresh", auth.Refresh)
+		r.Post("/forgot-password", auth.ForgotPassword)
+		r.Post("/reset-password", auth.ResetPassword)
+	})
+
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(handler.AuthMiddleware)
+
+		r.Get("/me", auth.Me)
 
 		r.Route("/accounts", func(r chi.Router) {
 			r.Get("/", ah.List)

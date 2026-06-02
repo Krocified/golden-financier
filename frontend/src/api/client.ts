@@ -1,16 +1,77 @@
-const TOKEN = import.meta.env.VITE_AUTH_TOKEN || ''
-
 const BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || '')
 
+export const TOKEN_KEY = 'auth_token'
+export const REFRESH_TOKEN_KEY = 'refresh_token'
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || ''
+}
+
+function getRefreshToken() {
+  return localStorage.getItem(REFRESH_TOKEN_KEY) || ''
+}
+
+async function tryRefresh(): Promise<boolean> {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) return false
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+    localStorage.setItem(TOKEN_KEY, data.access_token)
+    localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token)
+    return true
+  } catch {
+    return false
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken()
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options?.headers,
     },
   })
+
+  if (res.status === 401) {
+    const refreshed = await tryRefresh()
+    if (refreshed) {
+      const newToken = getToken()
+      const retryRes = await fetch(`${BASE_URL}${path}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${newToken}`,
+          ...options?.headers,
+        },
+      })
+      if (retryRes.status === 401) {
+        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(REFRESH_TOKEN_KEY)
+        window.location.href = '/login'
+        throw new Error('unauthorized')
+      }
+      if (!retryRes.ok) {
+        const body = await retryRes.json().catch(() => ({}))
+        throw new Error(body.error || `HTTP ${retryRes.status}`)
+      }
+      if (retryRes.status === 204) return undefined as T
+      return retryRes.json()
+    }
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    window.location.href = '/login'
+    throw new Error('unauthorized')
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -22,6 +83,17 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  auth: {
+    register: (data: { email: string; password: string; name: string }) =>
+      request<{ access_token: string; refresh_token: string; user: { id: string; email: string; name: string } }>(
+        '/api/v1/auth/register', { method: 'POST', body: JSON.stringify(data) },
+      ),
+    login: (data: { email: string; password: string }) =>
+      request<{ access_token: string; refresh_token: string; user: { id: string; email: string; name: string } }>(
+        '/api/v1/auth/login', { method: 'POST', body: JSON.stringify(data) },
+      ),
+    me: () => request<{ id: string; email: string; name: string }>('/api/v1/me'),
+  },
   accounts: {
     list: () => request<Account[]>('/api/v1/accounts'),
     get: (id: string) => request<Account>(`/api/v1/accounts/${id}`),

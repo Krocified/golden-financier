@@ -7,4 +7,4 @@ backend/finance.db-shm
 backend/golden-financier
 backend/server
 frontend/node_modules
-# frontend/.env intentionally included so Vite bakes VITE_AUTH_TOKEN into the production build
+frontend/.env

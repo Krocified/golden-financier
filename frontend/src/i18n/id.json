@@ -35,6 +35,7 @@
     "edit_transaction": "Edit Transaksi",
     "all_accounts": "Semua Rekening",
     "no_transactions": "TIDAK ADA TRANSAKSI",
+    "need_account_first": "Buat rekening terlebih dahulu sebelum menambah transaksi",
     "required_fields": "Lengkapi semua field wajib",
     "amount_must_be_positive": "Jumlah harus angka positif",
     "saved": "Transaksi ditambahkan",

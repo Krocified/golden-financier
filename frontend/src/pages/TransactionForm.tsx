@@ -28,6 +28,12 @@ export function TransactionForm() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    if (accounts && accounts.length === 0 && !isEdit) {
+      toast.error(t('transactions.need_account_first'))
+    }
+  }, [accounts, isEdit, t])
+
+  useEffect(() => {
     if (isEdit && id) {
       api.transactions.list().then((txns) => {
         const tran = txns.find((tx: Transaction) => tx.id === id)
@@ -45,8 +51,16 @@ export function TransactionForm() {
     }
   }, [id, isEdit])
 
+  const noAccounts = accounts && accounts.length === 0
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (noAccounts) {
+      toast.error(t('transactions.need_account_first'))
+      return
+    }
+
     if (!form.account_id || !form.payee || !form.amount_cents) {
       toast.error(t('transactions.required_fields'))
       return
@@ -183,10 +197,16 @@ export function TransactionForm() {
           </div>
         </div>
 
+        {noAccounts && (
+          <p className="text-xs font-bold text-center text-red-600 border-2 border-red-600 p-3 bg-red-50">
+            {t('transactions.need_account_first')}
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={loading}
-          className="brutal-btn w-full py-3 text-sm font-bold uppercase tracking-wider"
+          disabled={loading || noAccounts}
+          className="brutal-btn w-full py-3 text-sm font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? t('common.saving') : isEdit ? t('common.save_changes') : t('common.save')}
         </button>

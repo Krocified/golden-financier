@@ -35,6 +35,7 @@
     "edit_transaction": "Edit Transaction",
     "all_accounts": "All Accounts",
     "no_transactions": "NO TRANSACTIONS",
+    "need_account_first": "Add an account first before creating transactions",
     "required_fields": "Fill in all required fields",
     "amount_must_be_positive": "Amount must be a positive number",
     "saved": "Transaction saved",

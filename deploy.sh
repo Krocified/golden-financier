@@ -8,6 +8,8 @@ cd "$DIR"
 APP_NAME="${FLY_APP_NAME:-golden-financier}"
 REGION="${FLY_REGION:-sin}"            # Singapore — closest to Indonesia
 JWT_SECRET="${JWT_SECRET:-}"
+TURSO_URL="${TURSO_URL:-}"
+TURSO_TOKEN="${TURSO_TOKEN:-}"
 
 # ─── Colors ──────────────────────────────────────────────
 BOLD='\033[1m'
@@ -72,7 +74,12 @@ fi
 info "Setting JWT_SECRET secret..."
 $FLY secrets set JWT_SECRET="$JWT_SECRET" --app "$APP_NAME"
 
-# 7. Create volume if it doesn't exist
+if [ -n "$TURSO_URL" ]; then
+  info "Setting TURSO_URL and TURSO_TOKEN secrets..."
+  $FLY secrets set TURSO_URL="$TURSO_URL" TURSO_TOKEN="$TURSO_TOKEN" --app "$APP_NAME"
+fi
+
+# 8. Create volume if it doesn't exist
 if ! $FLY volumes list --app "$APP_NAME" 2>/dev/null | grep -q "data"; then
   info "Creating 1GB persistent volume..."
   $FLY volumes create data --app "$APP_NAME" --region "$REGION" --size 1 --yes

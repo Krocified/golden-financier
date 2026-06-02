@@ -8,10 +8,11 @@ RUN npm run build
 
 # ---- Backend build ----
 FROM golang:1.25-alpine AS backend
+RUN apk add --no-cache gcc musl-dev
 WORKDIR /app
 COPY backend/ .
 COPY --from=frontend /app/dist ./dist
-RUN CGO_ENABLED=0 go build -o server .
+RUN CGO_ENABLED=1 go build -o server .
 
 # ---- Runtime ----
 FROM alpine:3.19

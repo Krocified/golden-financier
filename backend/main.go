@@ -19,7 +19,23 @@ import (
 	"golden-financier/migrate"
 )
 
-func main() {
+func openDB() *sqlx.DB {
+	tursoURL := os.Getenv("TURSO_URL")
+	tursoToken := os.Getenv("TURSO_TOKEN")
+
+	if tursoURL != "" {
+		dsn := tursoURL
+		if tursoToken != "" {
+			dsn += "?authToken=" + tursoToken
+		}
+		db, err := sqlx.Open("libsql", dsn)
+		if err != nil {
+			log.Fatalf("open turso db: %v", err)
+		}
+		log.Println("connected to Turso")
+		return db
+	}
+
 	dbPath := os.Getenv("DATABASE_PATH")
 	if dbPath == "" {
 		dbPath = "./finance.db"
@@ -27,8 +43,14 @@ func main() {
 
 	db, err := sqlx.Open("sqlite", dbPath+"?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)")
 	if err != nil {
-		log.Fatalf("open db: %v", err)
+		log.Fatalf("open sqlite db: %v", err)
 	}
+	log.Printf("connected to local SQLite: %s", dbPath)
+	return db
+}
+
+func main() {
+	db := openDB()
 	defer db.Close()
 
 	if err := migrate.Run(db.DB); err != nil {

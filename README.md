@@ -33,6 +33,8 @@ Open `http://localhost:5173`.
 
 Requires a [Fly.io](https://fly.io) account (free tier). The script installs `flyctl`, creates the app, sets up a 1GB persistent volume for SQLite, and deploys to Singapore.
 
+**Note:** Fly.io requires a credit card on file even for the free tier (no charges for free usage). Add yours at https://fly.io/dashboard/billing before running the script.
+
 ## Features
 
 - Dashboard with net worth, income/expense summary, recent transactions

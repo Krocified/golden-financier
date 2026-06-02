@@ -1,4 +1,5 @@
 app = "golden-financier"
+primary_region = "sin"
 
 [build]
   dockerfile = "Dockerfile"

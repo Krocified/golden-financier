@@ -39,7 +39,16 @@ if ! $FLY auth whoami &>/dev/null; then
   $FLY auth login
 fi
 
-# 3. Validate frontend builds
+# 3. Check billing (required by Fly.io even for free tier)
+BILLING_OK=$($FLY billing dashboard 2>&1 || true)
+if echo "$BILLING_OK" | grep -qi "payment\|credit card\|billing"; then
+  warn "Fly.io requires billing info (no charge for free tier usage)."
+  warn "Open https://fly.io/dashboard/billing to add a card, then re-run."
+  echo ""
+  read -rp "Press Enter after adding billing info, or Ctrl+C to abort..."
+fi
+
+# 4. Validate frontend builds
 info "Validating frontend build..."
 (cd frontend && npm install --silent && npm run build) || error "Frontend build failed"
 
@@ -72,14 +81,14 @@ $FLY secrets set AUTH_TOKEN="$AUTH_TOKEN" --app "$APP_NAME"
 # 7. Create volume if it doesn't exist
 if ! $FLY volumes list --app "$APP_NAME" 2>/dev/null | grep -q "data"; then
   info "Creating 1GB persistent volume..."
-  $FLY volumes create data --app "$APP_NAME" --region "$REGION" --size 1
+  $FLY volumes create data --app "$APP_NAME" --region "$REGION" --size 1 --yes
 else
   info "Volume 'data' already exists"
 fi
 
 # 8. Deploy
-info "Deploying to Fly.io (region: $REGION)..."
-$FLY deploy --app "$APP_NAME" --region "$REGION" --strategy immediate
+info "Deploying to Fly.io..."
+$FLY deploy --app "$APP_NAME" --strategy immediate
 
 echo ""
 echo -e "${BOLD}${GREEN}✔${NC} Deployed!"

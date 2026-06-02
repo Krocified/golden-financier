@@ -3,9 +3,10 @@ package main
 import (
 	"io/fs"
 	"log"
+	"mime"
 	"net/http"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -112,11 +113,18 @@ func serveFrontend(r chi.Router) {
 		return
 	}
 
-	fileServer := http.FileServer(http.FS(sub))
-
 	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/assets")
-		fileServer.ServeHTTP(w, r)
+		filePath := r.URL.Path[1:] // remove leading "/" -> "assets/foo.js"
+		data, err := fs.ReadFile(sub, filePath)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		ext := filepath.Ext(filePath)
+		if mimeType := mime.TypeByExtension(ext); mimeType != "" {
+			w.Header().Set("Content-Type", mimeType)
+		}
+		w.Write(data)
 	})
 
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {

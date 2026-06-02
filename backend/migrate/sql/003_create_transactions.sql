@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     amount_cents INTEGER NOT NULL,
     payee TEXT NOT NULL DEFAULT '',
     category_id TEXT REFERENCES categories(id),
+    description TEXT NOT NULL DEFAULT '',
     notes TEXT NOT NULL DEFAULT '',
     reconciled INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))

@@ -41,16 +41,21 @@
     "saved": "Transaksi ditambahkan",
     "updated": "Transaksi diperbarui",
     "save_failed": "Gagal menyimpan",
+    "income": "Pemasukan",
+    "expense": "Pengeluaran",
     "fields": {
       "account": "Rekening",
       "date": "Tanggal",
       "amount": "Jumlah",
       "payee": "Penerima",
       "category": "Kategori",
+      "type": "Tipe",
+      "description": "Deskripsi",
       "notes": "Catatan",
       "no_category": "Tanpa kategori",
       "select_account": "Pilih rekening",
       "payee_placeholder": "Nama merchant atau penerima",
+      "description_placeholder": "Untuk apa?",
       "notes_placeholder": "Catatan tambahan..."
     }
   },

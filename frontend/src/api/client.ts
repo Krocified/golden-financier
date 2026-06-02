@@ -161,6 +161,7 @@ export interface Transaction {
   amount_cents: number
   payee: string
   category_id?: string | null
+  description: string
   notes: string
   reconciled: boolean
   created_at: string

@@ -41,16 +41,21 @@
     "saved": "Transaction saved",
     "updated": "Transaction updated",
     "save_failed": "Failed to save",
+    "income": "Income",
+    "expense": "Expense",
     "fields": {
       "account": "Account",
       "date": "Date",
       "amount": "Amount",
       "payee": "Payee",
       "category": "Category",
+      "type": "Type",
+      "description": "Description",
       "notes": "Notes",
       "no_category": "No category",
       "select_account": "Select account",
       "payee_placeholder": "Merchant or recipient name",
+      "description_placeholder": "What was this for?",
       "notes_placeholder": "Optional notes"
     }
   },

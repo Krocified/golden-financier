@@ -149,18 +149,27 @@ func serveFrontend(r chi.Router) {
 		return
 	}
 
-	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
-		filePath := r.URL.Path[1:] // remove leading "/" -> "assets/foo.js"
+	serveStatic := func(w http.ResponseWriter, filePath string) bool {
 		data, err := fs.ReadFile(sub, filePath)
 		if err != nil {
-			w.WriteHeader(http.StatusNotFound)
-			return
+			return false
 		}
 		ext := filepath.Ext(filePath)
 		if mimeType := mime.TypeByExtension(ext); mimeType != "" {
 			w.Header().Set("Content-Type", mimeType)
 		}
 		w.Write(data)
+		return true
+	}
+
+	r.Get("/assets/*", func(w http.ResponseWriter, r *http.Request) {
+		serveStatic(w, r.URL.Path[1:])
+	})
+
+	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		if !serveStatic(w, "favicon.ico") {
+			serveStatic(w, "favicon.svg")
+		}
 	})
 
 	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {

@@ -51,6 +51,9 @@ export function TransactionList() {
           >
             <div className="min-w-0 flex-1">
               <p className="font-bold text-sm truncate">{tran.payee}</p>
+              {tran.description && (
+                <p className="text-xs text-black/60 truncate mt-0.5">{tran.description}</p>
+              )}
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="text-xs font-bold text-black/50">{formatDate(tran.date)}</span>
                 {tran.reconciled && (

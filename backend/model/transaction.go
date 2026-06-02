@@ -16,6 +16,7 @@ type Transaction struct {
 	AmountCents int64   `db:"amount_cents" json:"amount_cents"`
 	Payee       string  `db:"payee" json:"payee"`
 	CategoryID  *string `db:"category_id" json:"category_id,omitempty"`
+	Description string  `db:"description" json:"description"`
 	Notes       string  `db:"notes" json:"notes"`
 	Reconciled  bool    `db:"reconciled" json:"reconciled"`
 	CreatedAt   string  `db:"created_at" json:"created_at"`
@@ -40,10 +41,10 @@ func CreateTransaction(db *sqlx.DB, t *Transaction, userID string) error {
 	defer tx.Rollback()
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions (id, account_id, date, amount_cents, payee, category_id, notes, reconciled, created_at, user_id)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO transactions (id, account_id, date, amount_cents, payee, category_id, description, notes, reconciled, created_at, user_id)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		t.ID, t.AccountID, t.Date, t.AmountCents, t.Payee,
-		t.CategoryID, t.Notes, t.Reconciled, t.CreatedAt, t.UserID,
+		t.CategoryID, t.Description, t.Notes, t.Reconciled, t.CreatedAt, t.UserID,
 	)
 	if err != nil {
 		return fmt.Errorf("insert transaction: %w", err)
@@ -107,9 +108,9 @@ func UpdateTransaction(db *sqlx.DB, t *Transaction, userID string) error {
 
 	_, err = tx.Exec(
 		`UPDATE transactions SET account_id = ?, date = ?, amount_cents = ?, payee = ?,
-		 category_id = ?, notes = ?, reconciled = ? WHERE id = ? AND `+userScope(""),
+		 category_id = ?, description = ?, notes = ?, reconciled = ? WHERE id = ? AND `+userScope(""),
 		t.AccountID, t.Date, t.AmountCents, t.Payee,
-		t.CategoryID, t.Notes, t.Reconciled, t.ID, userID,
+		t.CategoryID, t.Description, t.Notes, t.Reconciled, t.ID, userID,
 	)
 	if err != nil {
 		return fmt.Errorf("update transaction: %w", err)
